@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz o Urzeczu</title>
+  <style>
+    /* Ustawienie tła – obrazek tła znajduje się w folderze "img" */
+    body {
+      font-family: Arial, sans-serif;
+      background: url('img/tlo.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #quiz-container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 350px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #question-number {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    #question {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .next-btn {
+      margin-top: 20px;
+      background-color: #28a745;
+    }
+    .hide {
+      display: none;
+    }
+    #congratulations {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div id="quiz-container">
+    <h1>Quiz o Urzeczu</h1>
+    <p id="question-number"></p>
+    <div id="question-container">
+      <p id="question"></p>
+      <div id="answer-buttons" class="btn-container">
+        <button class="btn" onclick="selectAnswer(0)"></button>
+        <button class="btn" onclick="selectAnswer(1)"></button>
+        <button class="btn" onclick="selectAnswer(2)"></button>
+        <button class="btn" onclick="selectAnswer(3)"></button>
+      </div>
+    </div>
+    <button id="next-btn" class="next-btn hide" onclick="nextQuestion()">Następne pytanie</button>
+    <div id="result-container" class="hide">
+      <p>Twój wynik: <span id="score"></span></p>
+      <p id="congratulations"></p>
+      <button onclick="restartQuiz()">Zagraj ponownie</button>
+    </div>
+  </div>
+  <script>
+    const questions = [
+      {
+        question: "Jakie położenie geograficzne charakteryzuje mikroregion Urzecze?",
+        answers: [
+          { text: "Znajduje się nad Wisłą, między ujściami Pilicy i Wilgi a rubieżami Warszawy", correct: true },
+          { text: "Leży na północnym wybrzeżu Bałtyku", correct: false },
+          { text: "Położony jest w Beskidach", correct: false },
+          { text: "Znajduje się w Podkarpaciu", correct: false }
+        ]
+      },
+      {
+        question: "Która rzeka była kluczowa dla rozwoju handlu w Urzeczu?",
+        answers: [
+          { text: "Wisła", correct: true },
+          { text: "Odra", correct: false },
+          { text: "Warta", correct: false },
+          { text: "Bug", correct: false }
+        ]
+      },
+      {
+        question: "Jaką grupą kolonizacyjną byli głównie osadnicy, którzy wpłynęli na kulturę Urzecza?",
+        answers: [
+          { text: "Olędrzy", correct: true },
+          { text: "Mennonici", correct: false },
+          { text: "Szwedzi", correct: false },
+          { text: "Francuzi", correct: false }
+        ]
+      },
+      {
+        question: "Jak nazywano flisaków, którzy transportowali towary Wisłą?",
+        answers: [
+          { text: "Oryle", correct: true },
+          { text: "Żeglarze", correct: false },
+          { text: "Kapitanowie", correct: false },
+          { text: "Rybacy", correct: false }
+        ]
+      },
+      {
+        question: "Jak określa się tradycyjny ubiór mieszkańców Urzecza?",
+        answers: [
+          { text: "Stroje wilanowskie", correct: true },
+          { text: "Stroje góralskie", correct: false },
+          { text: "Stroje kaszubskie", correct: false },
+          { text: "Stroje ludowe z Podlasia", correct: false }
+        ]
+      },
+      {
+        question: "W którym województwie znajduje się Urzecze?",
+        answers: [
+          { text: "Mazowieckim", correct: true },
+          { text: "Małopolskim", correct: false },
+          { text: "Wielkopolskim", correct: false },
+          { text: "Podlaskim", correct: false }
+        ]
+      },
+      {
+        question: "Jakie znaczenie miała obecność Wisły dla mieszkańców Urzecza?",
+        answers: [
+          { text: "Umożliwiała handel i transport towarów", correct: true },
+          { text: "Służyła wyłącznie jako źródło wody pitnej", correct: false },
+          { text: "Była przeszkodą w rozwoju regionu", correct: false },
+          { text: "Nie miała znaczenia ekonomicznego", correct: false }
+        ]
+      },
+      {
+        question: "Jakie techniki melioracyjne stosowano na Urzeczu?",
+        answers: [
+          { text: "Budowano groble, rowy i poldery", correct: true },
+          { text: "Kopano jedynie głębokie studnie", correct: false },
+          { text: "Wznoszono wieżowce", correct: false },
+          { text: "Budowano mosty wiszące", correct: false }
+        ]
+      },
+      {
+        question: "Jakie elementy nadrzecznego budownictwa są charakterystyczne dla Urzecza?",
+        answers: [
+          { text: "Budynki wznoszone na terpach", correct: true },
+          { text: "Kamienne zamki", correct: false },
+          { text: "Nowoczesne osiedla", correct: false },
+          { text: "Wielkie pałace", correct: false }
+        ]
+      },
+      {
+        question: "Jakie wydarzenie kulturalne tradycyjnie organizuje się w Urzeczu?",
+        answers: [
+          { text: "Flis Festiwal", correct: true },
+          { text: "Festiwal Filmowy", correct: false },
+          { text: "Noc Muzeów", correct: false },
+          { text: "Festiwal Jazzowy", correct: false }
+        ]
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // Funkcja mieszająca tablicę (Fisher-Yates shuffle)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startQuiz() {
+      document.getElementById('result-container').classList.add('hide');
+      document.getElementById('question-container').classList.remove('hide');
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById('next-btn').classList.add('hide');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      document.getElementById('question-number').textContent = `Pytanie ${currentQuestionIndex + 1} z ${questions.length}`;
+      const questionElement = document.getElementById('question');
+      const answerButtons = document.querySelectorAll('.btn');
+      const currentQuestion = questions[currentQuestionIndex];
+      questionElement.textContent = currentQuestion.question;
+      const shuffledAnswers = currentQuestion.answers.slice();
+      shuffle(shuffledAnswers);
+      answerButtons.forEach((button, index) => {
+        button.textContent = shuffledAnswers[index].text;
+        button.dataset.correct = shuffledAnswers[index].correct;
+        button.style.backgroundColor = '#007bff';
+        button.disabled = false;
+      });
+    }
+
+    function selectAnswer(index) {
+      const buttons = document.querySelectorAll('.btn');
+      const selectedButton = buttons[index];
+      const correct = selectedButton.dataset.correct === 'true';
+      if (correct) {
+        selectedButton.style.backgroundColor = '#28a745';
+        score++;
+      } else {
+        selectedButton.style.backgroundColor = '#dc3545';
+        buttons.forEach(btn => {
+          if (btn.dataset.correct === 'true') {
+            btn.style.backgroundColor = '#28a745';
+          }
+        });
+      }
+      buttons.forEach(btn => btn.disabled = true);
+      document.getElementById('next-btn').classList.remove('hide');
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion();
+        document.getElementById('next-btn').classList.add('hide');
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('question-container').classList.add('hide');
+      document.getElementById('result-container').classList.remove('hide');
+      document.getElementById('score').textContent = `${score} z ${questions.length}`;
+      const congratulationsElement = document.getElementById('congratulations');
+      if (score === questions.length) {
+        congratulationsElement.textContent = "Gratulacje! Jesteś ekspertem od Urzecza!";
+      } else if (score >= questions.length / 2) {
+        congratulationsElement.textContent = "Dobra robota! Masz sporą wiedzę o Urzeczu.";
+      } else {
+        congratulationsElement.textContent = "Nieźle, ale możesz jeszcze zgłębić tajniki Urzecza.";
+      }
+    }
+
+    function restartQuiz() {
+      startQuiz();
+    }
+
+    startQuiz();
+  </script>
+</body>
+</html>
